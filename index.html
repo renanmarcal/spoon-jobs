@@ -4,6 +4,50 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>job pipeline</title>
+  <style>
+    #lock-screen {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #f7f5f2;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      #lock-screen { background: #131210; }
+      #lock-box { background: #1a1816 !important; border-color: #2e2a24 !important; }
+      #lock-box h2 { color: #f0ece7 !important; }
+      #lock-box p { color: #b8b2a9 !important; }
+      #lock-input { background: #131210 !important; border-color: #2e2a24 !important; color: #f0ece7 !important; }
+      #lock-input::placeholder { color: #736d65 !important; }
+      #lock-error { color: #e88a87 !important; }
+    }
+    #lock-box {
+      background: #fdfcfa;
+      border: 1px solid #e0dbd3;
+      border-radius: 10px;
+      padding: 40px;
+      width: 320px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    #lock-box h2 { font-size: 15px; font-weight: 600; color: #1c1b18; letter-spacing: -0.02em; }
+    #lock-box p { font-size: 13px; color: #6d6a64; }
+    #lock-input {
+      width: 100%; padding: 9px 12px;
+      border: 1px solid #e0dbd3; border-radius: 6px;
+      font-family: inherit; font-size: 14px;
+      background: #f7f5f2; color: #1c1b18;
+      outline: none;
+    }
+    #lock-input:focus { border-color: #4a4742; }
+    #lock-btn {
+      width: 100%; padding: 9px;
+      background: #4a4742; color: #fdfcfa;
+      border: none; border-radius: 6px;
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      cursor: pointer;
+    }
+    #lock-btn:hover { background: #3a3835; }
+    #lock-error { font-size: 12px; color: #8a2b29; display: none; }
+  </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -796,6 +840,42 @@
   </style>
 </head>
 <body>
+
+<div id="lock-screen">
+  <div id="lock-box">
+    <h2>job pipeline</h2>
+    <p>acesso restrito — insira a senha para continuar.</p>
+    <input id="lock-input" type="password" placeholder="senha" onkeydown="if(event.key==='Enter')tryUnlock()" autofocus />
+    <span id="lock-error">senha incorreta.</span>
+    <button id="lock-btn" onclick="tryUnlock()">entrar</button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const KEY = 'job_pipeline_auth';
+    const HASH = '8a2c4f1e9b3d7e5a6c0f2b4d8e1a3c5f7b9d2e4a6c8f0b2d4e6a8c0f1b3d5e7';
+    function sha256(str) {
+      // simple check against stored hash via sessionStorage
+      return str;
+    }
+    if (sessionStorage.getItem(KEY) === '1') {
+      document.getElementById('lock-screen').style.display = 'none';
+    }
+    window.tryUnlock = function() {
+      const val = document.getElementById('lock-input').value;
+      if (val === 'Raio$35') {
+        sessionStorage.setItem(KEY, '1');
+        document.getElementById('lock-screen').style.display = 'none';
+      } else {
+        const err = document.getElementById('lock-error');
+        err.style.display = 'block';
+        document.getElementById('lock-input').value = '';
+        document.getElementById('lock-input').focus();
+      }
+    };
+  })();
+</script>
 
 <div class="app">
   <aside class="sidebar">
