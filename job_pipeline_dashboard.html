@@ -1,0 +1,2436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>job pipeline</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --bg: #f7f5f2;
+      --bg-alt: #edeae5;
+      --surface: #fdfcfa;
+      --border: #e0dbd3;
+      --text: #1c1b18;
+      --text-2: #6d6a64;
+      --text-3: #a5a09a;
+      --accent: #4a4742;
+      --accent-hover: #3a3835;
+      --accent-light: #eae4db;
+      --success: #5a8c3a;
+      --warn-bg: #fbe9cf;
+      --warn-text: #8a5a14;
+      --danger-bg: #f4cdcb;
+      --danger-text: #8a2b29;
+      --alert-bg: #fef3e6;
+      --alert-border: #f5b233;
+      --alert-text: #8b6914;
+      --drop-target: rgba(74, 71, 66, 0.08);
+      --drop-target-border: var(--accent);
+      /* ── tokens ── */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 10px;
+      --spacing-page: 1.5rem;
+      --w-content: 960px;
+      --w-board: 1440px;
+      /* ── spacing scale ── */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #131210;
+        --bg-alt: #1d1b18;
+        --surface: #1a1816;
+        --border: #2e2a24;
+        --text: #f0ece7;
+        --text-2: #b8b2a9;
+        --text-3: #736d65;
+        --accent: #d4ccc2;
+        --accent-hover: #e0d8ce;
+        --accent-light: #2a2620;
+        --success: #7eb654;
+        --warn-bg: #3d3018;
+        --warn-text: #e8c47a;
+        --danger-bg: #3d1f1d;
+        --danger-text: #e88a87;
+        --alert-bg: #3d3420;
+        --alert-border: #6b5a1a;
+        --alert-text: #e8d4a0;
+        --drop-target: rgba(212, 204, 194, 0.06);
+      }
+    }
+
+    body { font-family: var(--font); background: var(--bg); color: var(--text); overflow: hidden; }
+    button { font-family: var(--font); }
+
+    /* ── layout ── */
+    .app { display: flex; height: 100vh; }
+
+    .sidebar {
+      width: 240px; flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 1.75rem 0; gap: 1.5rem;
+    }
+
+    .sidebar-logo {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo h1 { font-size: 14px; font-weight: 600; letter-spacing: -0.02em; }
+    .sidebar-logo p { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+
+    .sidebar-nav { padding: 0 1rem; display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-label {
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 0 0.75rem; margin-bottom: 6px;
+    }
+
+    .sidebar-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: var(--radius-sm);
+      font: 500 13px var(--font); color: var(--text-2);
+      cursor: pointer; border: none; background: none;
+      width: 100%; text-align: left; transition: all 0.15s;
+    }
+    .sidebar-btn:hover { background: var(--bg-alt); color: var(--text); }
+    .sidebar-btn.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+    .sidebar-btn i { font-size: 17px; }
+
+    .sidebar-pill {
+      margin-left: auto; font-size: 11px; font-weight: 500;
+      background: var(--bg-alt); color: var(--text-3);
+      padding: 2px 7px; border-radius: var(--radius-lg);
+    }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 1.5rem 1rem 0;
+      border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .sidebar-tools {
+      display: flex; gap: 6px; padding: 0 0.5rem;
+    }
+    .icon-btn {
+      flex: 1; padding: 7px; border-radius: var(--radius-sm);
+      background: none; border: 1px solid var(--border);
+      color: var(--text-2); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      font: 500 11px var(--font);
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { background: var(--bg-alt); color: var(--text); }
+    .icon-btn i { font-size: 14px; }
+
+    .sidebar-status {
+      padding: 0 0.75rem; font-size: 12px; color: var(--text-3);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: calc(var(--w-content) + 3.5rem); margin: 0 auto;
+      padding: 0.875rem 1.75rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .topbar h2 { font-size: 16px; font-weight: 600; flex-shrink: 0; }
+
+    .search-box {
+      flex: 1; max-width: 360px; position: relative;
+    }
+    .search-box i {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      font-size: 15px; color: var(--text-3); pointer-events: none;
+    }
+    .search-box input {
+      width: 100%; font: 400 13px var(--font);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 8px 11px 8px 34px;
+      background: var(--bg-alt); color: var(--text); transition: all 0.15s;
+    }
+    .search-box input:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+    .search-clear {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); padding: 3px; border-radius: 4px;
+      display: none; align-items: center;
+    }
+    .search-clear.show { display: flex; }
+    .search-clear:hover { background: var(--bg); color: var(--text-2); }
+
+    .topbar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+    .fav-filter-btn { gap: 6px; color: var(--text-2); }
+    .fav-filter-btn i { font-size: 15px; }
+    .fav-filter-btn.on { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+    .fav-filter-btn.on:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    /* ── filter bar ── */
+    .filter-bar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .filter-bar-inner {
+      max-width: calc(var(--w-content) + 3.5rem); margin: 0 auto;
+      padding: 8px 1.75rem; display: flex; gap: var(--space-2); align-items: center;
+      flex-wrap: wrap;
+    }
+    .filter-bar select {
+      font: 500 12px var(--font);
+      padding: 5px 10px 5px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-alt); color: var(--text-2);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .filter-bar select:hover { border-color: var(--text-3); color: var(--text); }
+    .filter-bar select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+    .filter-bar select.active {
+      border-color: var(--accent); color: var(--accent);
+      background: var(--accent-light);
+    }
+    .filter-clear {
+      font: 500 12px var(--font); display: none; align-items: center; gap: 4px;
+      padding: 5px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: none; color: var(--text-3); cursor: pointer; transition: all 0.15s;
+    }
+    .filter-clear:hover { color: var(--text); border-color: var(--text-3); }
+    .filter-clear.show { display: flex; }
+    .kbd-hint {
+      font-size: 11px; color: var(--text-3);
+      padding: 2px 7px; border: 1px solid var(--border); border-radius: 4px;
+      background: var(--bg-alt); font-family: var(--font); font-weight: 600;
+      cursor: default; position: relative;
+    }
+    .kbd-hint::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 6px); left: 50%;
+      transform: translateX(-50%);
+      background: var(--text); color: var(--bg);
+      font-size: 11px; font-weight: 400;
+      padding: 4px 8px; border-radius: 4px;
+      white-space: nowrap; pointer-events: none;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .kbd-hint:hover::after { opacity: 1; }
+
+    .content {
+      flex: 1; overflow-y: auto;
+      padding: var(--spacing-page) 1.75rem;
+      padding-bottom: 3rem;
+    }
+
+    /* conteúdo limitado em largura — kanban transborda pra facilitar drag */
+    .content-inner {
+      max-width: var(--w-board);
+      margin: 0 auto;
+    }
+
+    /* kanban ocupa full width — fade sutil nas bordas em telas largas */
+    .pipeline-wrap {
+      position: relative;
+      margin: 0 -1.75rem;
+      padding: 0 1.75rem;
+    }
+    @media (min-width: 1600px) {
+      .pipeline-wrap {
+        -webkit-mask-image: linear-gradient(
+          to right,
+          transparent 0px,
+          black 2.5rem,
+          black calc(100% - 2.5rem),
+          transparent 100%
+        );
+        mask-image: linear-gradient(
+          to right,
+          transparent 0px,
+          black 2.5rem,
+          black calc(100% - 2.5rem),
+          transparent 100%
+        );
+      }
+    }
+
+    /* ── buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 8px 16px; border-radius: var(--radius-sm);
+      font: 600 13px var(--font); cursor: pointer;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text);
+      transition: all 0.15s; min-height: 36px;
+    }
+    .btn i { font-size: 16px; line-height: 1; }
+    .btn:hover { background: var(--bg-alt); border-color: var(--text-3); }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--accent); color: var(--surface); border-color: var(--accent);
+    }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    .btn-danger {
+      background: transparent; color: var(--danger-text); border-color: var(--danger-bg);
+    }
+    .btn-danger:hover { background: var(--danger-bg); }
+
+    .btn-paused-on {
+      background: var(--bg-alt);
+      color: var(--text-2);
+      border-color: var(--border);
+    }
+
+    .btn-rejected-on {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: var(--danger-bg);
+    }
+
+    /* ── insights row ── */
+    .insights {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: var(--space-3); margin: 0 auto var(--space-5);
+      max-width: var(--w-content);
+    }
+
+    .insights-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      max-width: var(--w-content);
+      margin: 0 auto var(--space-6);
+    }
+    
+    .insights-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-5) var(--space-5);
+    }
+    
+    .insights-section-title {
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: var(--space-4); padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--border);
+    }
+    .insight {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .insight-label {
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .insight-value { font-size: 24px; font-weight: 600; line-height: 1.1; }
+    .insight-sub { font-size: 12px; color: var(--text-2); font-weight: 400; line-height: 1.4; }
+    .insight-recorte {
+      font-size: 10px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-top: -2px;
+    }
+
+    /* ── diagnóstico ── */
+    .diagnostico {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 12px 16px;
+      margin: 0 auto 1.25rem; max-width: var(--w-content);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .diagnostico.alerta { background: var(--alert-bg); border-color: var(--alert-border); }
+    .diagnostico-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      background: var(--success);
+    }
+    .diagnostico.alerta .diagnostico-dot { background: var(--alert-text); }
+    .diagnostico-text { font-size: 13px; color: var(--text-2); line-height: 1.4; flex: 1; }
+    .diagnostico-text strong { color: var(--text); font-weight: 600; }
+    .diagnostico-recorte { font-size: 11px; color: var(--text-3); font-weight: 500; white-space: nowrap; }
+
+    /* ── tooltips ── */
+    .tip { position: relative; cursor: help; }
+    .tip::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 7px); left: 50%;
+      transform: translateX(-50%);
+      background: var(--text); color: var(--bg);
+      font-size: 11px; font-weight: 400; line-height: 1.5;
+      padding: 6px 10px; border-radius: var(--radius-sm);
+      width: max-content; max-width: 210px;
+      white-space: normal; text-align: left;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.15s; z-index: 200;
+    }
+    .tip:hover::after { opacity: 1; }
+    .tip-left::after { left: 0; transform: none; }
+    .tip-right::after { left: auto; right: 0; transform: none; }
+
+    /* ── pipeline grid ── */
+    .pipeline {
+      display: grid; gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    }
+    @media (min-width: 1280px) { .pipeline { grid-template-columns: repeat(6, 1fr); } }
+    @media (max-width: 999px)  { .pipeline { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 767px)  { .pipeline { grid-template-columns: repeat(2, 1fr); } }
+
+    .col-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; padding: 0 2px;
+    }
+    .col-label {
+      font-size: 11px; font-weight: 600; color: var(--text-2);
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .col-count {
+      font-size: 11px; font-weight: 500; color: var(--text-3);
+      background: var(--bg-alt); padding: 2px 7px; border-radius: var(--radius-md);
+    }
+    .col-cards {
+      display: flex; flex-direction: column; gap: 8px;
+      min-height: 80px; padding: 4px; margin: -4px;
+      border-radius: var(--radius-md);
+      transition: background 0.15s;
+    }
+    .col-cards.drag-over {
+      background: var(--drop-target);
+      outline: 1.5px dashed var(--drop-target-border);
+      outline-offset: -2px;
+    }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 12px; cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .card.dragging { opacity: 0.4; cursor: grabbing; }
+    .card-company { font-size: 11px; font-weight: 500; color: var(--text-3); margin-bottom: 3px; }
+    .card-title { font-size: 13px; font-weight: 600; line-height: 1.35; margin-bottom: 8px; }
+    .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: var(--radius-lg); }
+    .badge-neutral { background: var(--bg-alt); color: var(--text-3); }
+    .badge-warn { background: var(--warn-bg); color: var(--warn-text); }
+    .badge-danger { background: var(--danger-bg); color: var(--danger-text); }
+    .badge-paused { background: var(--bg-alt); color: var(--text-3); border: 1px solid var(--border); }
+
+    .card-comment-dot {
+      position: absolute; top: 10px; right: 30px;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--text-3);
+    }
+    .card-star {
+      position: absolute; top: 6px; right: 6px;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); font-size: 15px; line-height: 1;
+      padding: 3px; border-radius: var(--radius-sm);
+      opacity: 0; transition: opacity 0.15s, color 0.15s;
+      display: flex; align-items: center;
+    }
+    .card:hover .card-star { opacity: 1; }
+    .card-star.on { opacity: 1; color: var(--accent); }
+    .card-star:hover { color: var(--accent); opacity: 1; }
+    .badge-date { color: var(--text-3); font-size: 10px; font-weight: 500; margin-left: auto; }
+
+    .card.paused { opacity: 0.55; }
+    .card.paused:hover { opacity: 0.8; }
+
+    .card.rejected {
+      opacity: 0.7;
+      background: var(--bg-alt);
+      border-style: dashed;
+    }
+    .card.rejected:hover { opacity: 0.9; border-color: var(--accent); }
+
+    .badge-rejected { background: var(--danger-bg); color: var(--danger-text); }
+    .badge-comment { background: var(--bg-alt); color: var(--text-2); border: 1px solid var(--border); }
+
+    /* ── insight rows (atenção + recusadas) ── */
+    .attention-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .attention-row:hover { border-color: var(--accent); }
+    .rejected-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; background: var(--danger-bg);
+      border-radius: var(--radius-md); cursor: pointer;
+      opacity: 0.7; transition: opacity 0.15s;
+    }
+    .rejected-row:hover { opacity: 0.9; }
+
+    /* ── timeline de comentários ── */
+    .timeline-section { margin-top: 1.5rem; }
+    .timeline-section .section-label { margin-bottom: 12px; }
+
+    .timeline-input-wrap {
+      display: flex; gap: 8px; margin-bottom: 1rem;
+    }
+    .timeline-input-wrap input {
+      flex: 1; font-size: 13px;
+    }
+    .timeline-input-wrap .btn {
+      flex-shrink: 0; padding: 8px 12px;
+    }
+
+    .timeline-list {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .timeline-item {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 8px; align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-item::before {
+      content: '';
+      position: absolute; left: -1.5rem; top: 16px;
+      width: 6px; height: 6px;
+      border-radius: 50%; background: var(--border);
+    }
+    .timeline-date {
+      font-size: 11px; color: var(--text-3);
+      font-weight: 500; margin-bottom: 3px;
+    }
+    .timeline-text {
+      font-size: 13px; color: var(--text); line-height: 1.5;
+    }
+    .timeline-delete {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); padding: 4px; border-radius: 4px;
+      opacity: 0; transition: all 0.15s;
+      display: flex; align-items: center;
+    }
+    .timeline-item:hover .timeline-delete { opacity: 1; }
+    .timeline-delete:hover { color: var(--danger-text); background: var(--danger-bg); }
+    .timeline-delete i { font-size: 14px; line-height: 1; }
+
+    .timeline-empty {
+      font-size: 12px; color: var(--text-3);
+      padding: 12px 0; text-align: center;
+    }
+
+    .empty-col {
+      background: var(--bg-alt); border: 1px dashed var(--border);
+      border-radius: var(--radius-md); padding: 20px 12px; text-align: center;
+      color: var(--text-3); font-size: 12px; line-height: 1.4;
+      min-height: 80px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 0;
+    }
+
+    /* ── empty state ── */
+    .empty-state {
+      text-align: center; padding: 4rem 2rem;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .empty-state i { font-size: 40px; color: var(--text-3); }
+    .empty-state h3 { font-size: 16px; font-weight: 600; }
+    .empty-state p { font-size: 13px; color: var(--text-2); max-width: 340px; line-height: 1.5; }
+    .empty-state .btn { margin-top: 8px; }
+
+    /* ── table view ── */
+    .table-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); overflow: hidden;
+      max-width: var(--w-content); margin: 0 auto;
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 10px 14px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      background: var(--bg-alt);
+      cursor: pointer; user-select: none;
+      white-space: nowrap;
+    }
+    th:hover { color: var(--text-2); }
+    th:not([onclick]):not(.col-star) { cursor: default; }
+    th:not([onclick]):not(.col-star):hover { color: var(--text-3); }
+    th .sort-arrow { opacity: 0.4; margin-left: 4px; font-size: 11px; }
+    th.sort-active .sort-arrow { opacity: 1; color: var(--accent); }
+    tbody tr { cursor: pointer; transition: background 0.1s; }
+    tbody tr:hover { background: var(--bg-alt); }
+    tbody tr:last-child td { border-bottom: none; }
+    td.company-cell { font-weight: 600; }
+    td.muted { color: var(--text-3); }
+    tr.row-rejected td { background: var(--bg-alt); opacity: 0.65; }
+    tr.row-rejected td.company-cell { text-decoration: line-through; text-decoration-color: var(--text-3); }
+    .row-star {
+      background: none; border: none; cursor: pointer; padding: 2px;
+      color: var(--text-3); font-size: 15px; line-height: 1;
+      display: flex; align-items: center; transition: color 0.15s;
+    }
+    .row-star.on { color: var(--accent); }
+    .row-star:hover { color: var(--accent); }
+    th.col-star, td.col-star { width: 36px; padding-left: 14px; padding-right: 0; }
+
+    /* ── modal ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      display: none; align-items: flex-start; justify-content: center;
+      z-index: 100; padding: 3rem 1rem; overflow-y: auto;
+    }
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border);
+      width: 100%; max-width: 600px; padding: 1.75rem;
+      max-height: calc(100vh - 8rem); overflow-y: auto;
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .modal-head h3 { font-size: 16px; font-weight: 600; }
+
+    .close-btn {
+      background: none; border: none; cursor: pointer; color: var(--text-2);
+      padding: 6px; border-radius: var(--radius-sm); display: flex; align-items: center;
+      transition: background 0.15s;
+    }
+    .close-btn:hover { background: var(--bg-alt); }
+    .close-btn i { font-size: 18px; line-height: 1; }
+
+    .section { margin-bottom: 1.25rem; }
+    .section-label {
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: var(--space-3); padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .type-picker { display: flex; gap: 10px; margin-bottom: 1.25rem; }
+    .type-opt {
+      flex: 1; padding: 11px; border: 1px solid var(--border);
+      border-radius: var(--radius-md); background: var(--surface); color: var(--text-2);
+      font: 600 13px var(--font); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .type-opt i { font-size: 16px; line-height: 1; }
+    .type-opt:hover { background: var(--bg-alt); }
+    .type-opt.on { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+
+    .row { display: flex; gap: 12px; margin-bottom: 10px; }
+    .field { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .field-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+
+    input, select, textarea {
+      font: 400 13px var(--font); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 9px 11px;
+      background: var(--bg-alt); color: var(--text); transition: all 0.15s;
+      font-family: var(--font);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .modal-foot {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 1.5rem; padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .modal-foot .save-msg {
+      margin-right: auto; font-size: 12px; font-weight: 500;
+      color: var(--text-3); display: none;
+    }
+    .modal-foot .save-msg.show { display: block; }
+
+    /* ── confirm modal ── */
+    .confirm-modal { max-width: 420px; }
+    .confirm-modal p {
+      font-size: 14px; color: var(--text-2); line-height: 1.5; margin-bottom: 1.25rem;
+    }
+    .confirm-modal p strong { color: var(--text); font-weight: 600; }
+
+    /* ── import diff ── */
+    .diff-summary {
+      background: var(--bg-alt); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px; margin-bottom: 1rem;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .diff-row {
+      display: flex; align-items: center; gap: 8px; font-size: 13px;
+    }
+    .diff-row strong { font-weight: 600; min-width: 30px; text-align: right; }
+    .diff-add strong { color: var(--success); }
+    .diff-update strong { color: var(--warn-text); }
+    .diff-keep strong { color: var(--text-3); }
+
+    /* ── detail panel ── */
+    .detail {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 420px;
+      background: var(--surface); border-left: 1px solid var(--border);
+      z-index: 50; display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform 0.25s ease;
+      max-width: 100vw;
+    }
+    .detail.open { transform: translateX(0); }
+
+    .detail-head {
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .detail-head .head-spacer { flex: 1; }
+    .detail-head span.title-tag {
+      font-size: 12px; font-weight: 600; color: var(--text-2);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    .detail-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+    .detail-company-edit {
+      width: 100%; font-size: 12px; font-weight: 500; color: var(--text-3);
+      border: none; background: transparent; padding: 2px 0; margin-bottom: 4px;
+    }
+    .detail-company-edit:focus {
+      outline: none; background: var(--bg-alt); padding: 2px 6px;
+      border-radius: 4px; box-shadow: none;
+    }
+    .detail-title-edit {
+      width: 100%; font-size: 19px; font-weight: 600; line-height: 1.3;
+      border: none; background: transparent; padding: 2px 0; margin-bottom: 1.25rem;
+      color: var(--text);
+    }
+    .detail-title-edit:focus {
+      outline: none; background: var(--bg-alt); padding: 2px 6px;
+      border-radius: 4px; box-shadow: none;
+    }
+
+    .steps { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .step {
+      font: 600 11px var(--font); padding: 5px 11px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text-2); cursor: pointer; transition: all 0.15s;
+    }
+    .step.on { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+    .step:hover:not(.on) { background: var(--bg-alt); }
+
+    .detail-grid {
+      display: grid; grid-template-columns: 100px 1fr; gap: 10px 12px;
+      align-items: center; margin-bottom: 1.5rem;
+    }
+    .detail-grid dt {
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .detail-grid dd {}
+    .detail-grid dd input,
+    .detail-grid dd select,
+    .detail-grid dd textarea {
+      width: 100%; background: transparent; border: 1px solid transparent;
+      padding: 6px 8px; margin: -6px -8px;
+    }
+    .detail-grid dd input:hover,
+    .detail-grid dd select:hover,
+    .detail-grid dd textarea:hover { background: var(--bg-alt); }
+    .detail-grid dd input:focus,
+    .detail-grid dd select:focus,
+    .detail-grid dd textarea:focus {
+      background: var(--bg-alt); border-color: var(--accent);
+    }
+    .detail-grid dd.readonly { font-size: 13px; color: var(--text); font-weight: 500; }
+
+    .save-indicator { font-size: 11px; color: var(--text-3); margin-top: 6px; min-height: 14px; font-weight: 500; }
+
+    /* ── toast ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--text); color: var(--bg);
+      padding: 10px 14px 10px 16px; border-radius: var(--radius-md);
+      display: flex; align-items: center; gap: 14px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      z-index: 200;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s, transform 0.25s;
+    }
+    .toast.show {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+    .toast-undo {
+      background: none; border: none; cursor: pointer;
+      color: var(--bg); font: 600 13px var(--font);
+      text-decoration: underline; padding: 4px 6px;
+      opacity: 0.9;
+    }
+    .toast-undo:hover { opacity: 1; }
+
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>job pipeline</h1>
+      <p>gestão de processos seletivos</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      
+      <button class="sidebar-btn active" data-view="pipeline" onclick="setView('pipeline')">
+        <i class="ti ti-layout-kanban"></i> Pipeline
+        <span class="sidebar-pill" id="total-count">0</span>
+      </button>
+      <button class="sidebar-btn" data-view="lista" onclick="setView('lista')">
+        <i class="ti ti-list"></i> Todas
+      </button>
+      <button class="sidebar-btn" data-view="insights" onclick="setView('insights')">
+        <i class="ti ti-chart-bar"></i> Insights
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div>
+        <div class="sidebar-label">dados</div>
+        <div class="sidebar-tools">
+          <button class="icon-btn" onclick="exportData()" title="exportar dados">
+            <i class="ti ti-download"></i> exportar
+          </button>
+          <button class="icon-btn" onclick="triggerImport()" title="importar dados">
+            <i class="ti ti-upload"></i> importar
+          </button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+        </div>
+      </div>
+      <div class="sidebar-status">
+        <div class="dot"></div>
+        <span>salvo localmente</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <h2 id="view-title">pipeline de vagas</h2>
+        <div class="search-box">
+          <i class="ti ti-search"></i>
+          <input type="text" id="search" placeholder="buscar empresa, título ou observações..." oninput="onSearch(this.value)">
+          <button class="search-clear" id="search-clear" onclick="clearSearch()">
+            <i class="ti ti-x" style="font-size:14px"></i>
+          </button>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn fav-filter-btn" id="fav-filter-btn" onclick="toggleFavFilter()" title="mostrar só favoritas">
+            <i class="ti ti-star"></i> <span id="fav-filter-count">0</span>
+          </button>
+          <span class="kbd-hint" data-tip="nova vaga">N</span>
+          <button class="btn btn-primary" onclick="openModal()">
+            <i class="ti ti-plus"></i> adicionar
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="filter-bar" id="filter-bar">
+      <div class="filter-bar-inner">
+        <select id="f-filter-origem" onchange="setFilter('origem', this.value)">
+          <option value="">canal: todos</option>
+          <option value="recruta">recruta</option>
+          <option value="linkedin-vagas">linkedin vagas</option>
+          <option value="linkedin-feed">feed</option>
+          <option value="site-empresa">site</option>
+        </select>
+        <select id="f-filter-modalidade" onchange="setFilter('modalidade', this.value)">
+          <option value="">modalidade: todas</option>
+          <option value="remoto">remoto</option>
+          <option value="hibrido">híbrido</option>
+          <option value="presencial">presencial</option>
+        </select>
+        <select id="f-filter-status" onchange="setFilter('status', this.value)">
+          <option value="">etapa: todas</option>
+          <option value="aplicado">aplicado</option>
+          <option value="triagem-recruta">triagem recruta</option>
+          <option value="entrevista-tecnica">entrevista técnica</option>
+          <option value="entrevista-gerente">entrevista gerente</option>
+          <option value="proposta">proposta</option>
+          <option value="fechado">fechado</option>
+        </select>
+        <select id="f-filter-estado" onchange="setFilter('estado', this.value)">
+          <option value="">estado: todos</option>
+          <option value="ativo">ativo</option>
+          <option value="pausado">pausada</option>
+          <option value="recusado">recusada</option>
+        </select>
+        <button class="filter-clear" id="filter-clear" onclick="clearFilters()">
+          <i class="ti ti-x" style="font-size:12px"></i> limpar
+        </button>
+      </div>
+    </div>
+    <div class="content" id="content-scroll">
+      <div class="content-inner" id="content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- add modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>adicionar vaga</h3>
+      <button class="close-btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+
+    <div class="section">
+      <div class="section-label">como chegou essa vaga?</div>
+      <div class="type-picker">
+        <button class="type-opt on" id="opt-recruta" onclick="pickType('recruta')">
+          <i class="ti ti-message"></i> recruta abordou
+        </button>
+        <button class="type-opt" id="opt-ativo" onclick="pickType('ativo')">
+          <i class="ti ti-search"></i> vaga encontrada
+        </button>
+      </div>
+    </div>
+
+
+
+      <div class="row">
+        <div class="field">
+          <label class="field-label">empresa</label>
+          <input type="text" id="f-empresa" placeholder="ex: Nubank (ou confidencial)">
+        </div>
+        <div class="field" style="max-width:140px">
+          <label class="field-label">origem</label>
+          <select id="f-origem">
+            <option value="">—</option>
+            <option value="recruta">recruta</option>
+            <option value="linkedin-vagas">linkedin vagas</option>
+            <option value="linkedin-feed">feed</option>
+            <option value="site-empresa">site</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="field-label">título da vaga</label>
+          <input type="text" id="f-titulo" placeholder="ex: Product Designer Sr">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="field-label">recrutador</label>
+          <input type="text" id="f-recruta" placeholder="nome do recrutador (opcional)">
+        </div>
+        <div class="field" style="max-width:160px">
+          <label class="field-label">modalidade</label>
+          <select id="f-modalidade">
+            <option value="indefinido">indefinido</option>
+            <option value="remoto">remoto</option>
+            <option value="hibrido">híbrido</option>
+            <option value="presencial">presencial</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="field-label">data da abordagem</label>
+          <input type="date" id="f-data-abordagem">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="field-label">contexto</label>
+          <textarea id="f-resumo" placeholder="tipo de produto, contexto do time..."></textarea>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="field-label">observações</label>
+          <textarea id="f-obs" placeholder="primeira impressão, alertas, contexto..."></textarea>
+        </div>
+      </div>
+
+    <div class="modal-foot">
+      <span class="save-msg" id="save-msg"></span>
+      <button class="btn" onclick="closeModal()">cancelar</button>
+      <button class="btn btn-primary" onclick="save()">
+        <i class="ti ti-device-floppy"></i> salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- confirm modal -->
+<div class="overlay" id="confirm-overlay" onclick="if(event.target===this)closeConfirm()">
+  <div class="modal confirm-modal">
+    <div class="modal-head">
+      <h3 id="confirm-title">confirmar</h3>
+      <button class="close-btn" onclick="closeConfirm()"><i class="ti ti-x"></i></button>
+    </div>
+    <p id="confirm-message"></p>
+    <div id="confirm-body"></div>
+    <div class="modal-foot">
+      <button class="btn" style="margin-right:auto" onclick="closeConfirm()">cancelar</button>
+      <button class="btn btn-primary" id="confirm-action">confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- detail panel -->
+<div class="detail" id="detail">
+  <div class="detail-head">
+    <button class="close-btn" onclick="closeDetail()"><i class="ti ti-arrow-left"></i></button>
+    <span class="title-tag">detalhe da vaga</span>
+    <div class="head-spacer"></div>
+    <button class="close-btn" id="detail-star-btn" title="favoritar">
+      <i class="ti ti-star" id="detail-star-icon"></i>
+    </button>
+    <button class="close-btn" onclick="askDelete()" title="excluir vaga">
+      <i class="ti ti-trash" style="color: var(--danger-text)"></i>
+    </button>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<!-- toast -->
+<div class="toast" id="toast">
+  <span id="toast-msg"></span>
+  <button class="toast-undo" id="toast-undo" onclick="undo()">desfazer</button>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   CONSTANTS
+   ═══════════════════════════════════════════════════════════════ */
+
+const STAGES = [
+  { id: 'aplicado',           label: 'aplicado',           icon: 'ti-send',            slaDays: 7  },
+  { id: 'triagem-recruta',    label: 'triagem recruta',    icon: 'ti-user-search',     slaDays: 14 },
+  { id: 'entrevista-tecnica', label: 'entrevista técnica', icon: 'ti-code',            slaDays: 10 },
+  { id: 'entrevista-gerente', label: 'entrevista gerente', icon: 'ti-briefcase',       slaDays: 10 },
+  { id: 'proposta',           label: 'proposta',           icon: 'ti-file-invoice',    slaDays: 5  },
+  { id: 'fechado',            label: 'fechado',            icon: 'ti-archive',         slaDays: Infinity },
+];
+
+const ORIGEM = {
+  'recruta':        { label: 'recruta',  full: 'recruta abordou',  icon: 'ti-user' },
+  'linkedin-vagas': { label: 'linkedin', full: 'linkedin vagas',   icon: 'ti-brand-linkedin' },
+  'linkedin-feed':  { label: 'feed',     full: 'feed linkedin',    icon: 'ti-brand-linkedin' },
+  'site-empresa':   { label: 'site',     full: 'site da empresa',  icon: 'ti-world' },
+};
+
+const STORAGE_KEY = 'job_pipeline_v2';
+
+// lookup O(1) para índice de etapa — STAGES nunca muda
+const STAGE_IDX = Object.fromEntries(STAGES.map((s, i) => [s.id, i]));
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════ */
+
+let vagas = [];
+let selectedId = null;
+let currentView = 'pipeline';
+let searchQuery = '';
+let favFilter = false;
+let filters = { origem: '', modalidade: '', status: '', estado: '' };
+let sortField = 'dataAbordagem';
+let sortDir = 'desc';
+let lastAction = null;
+let toastTimer = null;
+let fieldTimers = {};
+let confirmCallback = null;
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+
+const $ = id => document.getElementById(id);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const fmtDate = iso => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function daysSince(iso) {
+  if (!iso) return 0;
+  return Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function getStage(id) {
+  const stage = STAGES.find(s => s.id === id);
+  if (!stage) console.warn('[job-pipeline] status desconhecido:', id);
+  return stage || STAGES[0];
+}
+
+function getStageLevel(vaga) {
+  const stage = getStage(vaga.status);
+  if (stage.slaDays === Infinity) return 'ok';
+  const days = daysSince(vaga.stageEnteredAt || vaga.dataAbordagem || vaga.data);
+  if (days >= stage.slaDays * 2) return 'danger';
+  if (days >= stage.slaDays) return 'warn';
+  return 'ok';
+}
+
+function getStageDays(vaga) {
+  return daysSince(vaga.stageEnteredAt || vaga.dataAbordagem || vaga.data);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STORAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+function load() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) { vagas = []; return; }
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) throw new Error('formato inválido');
+    vagas = parsed;
+    vagas.forEach(v => {
+      if (!v.stageEnteredAt) v.stageEnteredAt = v.data;
+      if (!v.dataAbordagem)  v.dataAbordagem  = v.data;
+      if (v.pausado   === undefined) v.pausado   = false;
+      if (v.recusado  === undefined) v.recusado  = false;
+      if (v.favorito  === undefined) v.favorito  = false;
+      if (!v.modalidade) v.modalidade = 'indefinido';
+      if (v.recruta   === undefined) v.recruta   = '';
+      if (v.dataRecusa  === undefined) v.dataRecusa  = null;
+      if (v.tipoRecusa  === undefined) v.tipoRecusa  = null;
+      if (!v.comentarios) v.comentarios = [];
+    });
+  } catch(e) {
+    console.error('[job-pipeline] falha ao carregar dados:', e);
+    // não apaga os dados — tenta preservar o raw e avisa o usuário
+    vagas = [];
+    localStorage.setItem(STORAGE_KEY + '_backup', raw);
+    setTimeout(() => showToast('erro ao carregar dados — backup preservado em _backup', null), 200);
+  }
+}
+
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(vagas));
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+      showToast('armazenamento cheio — dados não foram salvos', null);
+    } else {
+      console.error('[job-pipeline] falha ao salvar dados:', e);
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ADD MODAL
+   ═══════════════════════════════════════════════════════════════ */
+
+function pickType(type) {
+  const isR = type === 'recruta';
+  $('opt-recruta').classList.toggle('on', isR);
+  $('opt-ativo').classList.toggle('on', !isR);
+  $('f-origem').value = isR ? 'recruta' : '';
+}
+
+function openModal() {
+  ['f-empresa','f-titulo','f-recruta','f-resumo','f-obs'].forEach(id => $(id).value = '');
+  $('f-modalidade').value = 'indefinido';
+  $('f-data-abordagem').value = new Date().toISOString().split('T')[0];
+  $('save-msg').classList.remove('show');
+  pickType('recruta');
+  $('overlay').classList.add('open');
+  setTimeout(() => $('f-empresa').focus(), 100);
+}
+
+function closeModal() {
+  $('overlay').classList.remove('open');
+}
+
+function save() {
+  const empresa = $('f-empresa').value.trim() || 'confidencial';
+  const titulo  = $('f-titulo').value.trim()  || '(sem título)';
+  const now = new Date().toISOString();
+  const dataAbordagem = $('f-data-abordagem').value
+    ? new Date($('f-data-abordagem').value).toISOString()
+    : now;
+
+  const vaga = {
+    id: uid(),
+    empresa,
+    titulo,
+    recruta:      $('f-recruta').value.trim(),
+    origem:       $('f-origem').value,
+    modalidade:   $('f-modalidade').value || 'indefinido',
+    resumo:       $('f-resumo').value.trim(),
+    obs:          $('f-obs').value.trim(),
+    status:       'aplicado',
+    pausado:      false,
+    recusado:     false,
+    dataRecusa:   null,
+    tipoRecusa:   null,
+    favorito:     false,
+    comentarios:  [],
+    data:         now,
+    dataAbordagem,
+    stageEnteredAt: now,
+  };
+
+  vagas.unshift(vaga);
+  persist();
+  render();
+
+  const msg = $('save-msg');
+  msg.textContent = 'salvo ✓';
+  msg.classList.add('show');
+  setTimeout(closeModal, 400);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SEARCH
+   ═══════════════════════════════════════════════════════════════ */
+
+function onSearch(q) {
+  searchQuery = q.toLowerCase().trim();
+  $('search-clear').classList.toggle('show', !!searchQuery);
+  render();
+}
+
+function clearSearch() {
+  $('search').value = '';
+  searchQuery = '';
+  $('search-clear').classList.remove('show');
+  render();
+}
+
+function matchSearch(v) {
+  if (!searchQuery) return true;
+  const haystack = [v.empresa, v.titulo, v.recruta, v.obs, v.resumo].join(' ').toLowerCase();
+  return haystack.includes(searchQuery);
+}
+
+const FILTER_IDS = ['f-filter-origem', 'f-filter-modalidade', 'f-filter-status', 'f-filter-estado'];
+
+function getFiltered() {
+  const base = favFilter ? vagas.filter(v => v.favorito) : vagas;
+  return base.filter(v => matchSearch(v) && matchFilters(v));
+}
+
+function matchFilters(v) {
+  if (filters.origem    && v.origem     !== filters.origem)    return false;
+  if (filters.modalidade && v.modalidade !== filters.modalidade) return false;
+  if (filters.status    && v.status     !== filters.status)    return false;
+  if (filters.estado === 'ativo'   && (v.pausado || v.recusado)) return false;
+  if (filters.estado === 'pausado' && !v.pausado)               return false;
+  if (filters.estado === 'recusado' && !v.recusado)             return false;
+  return true;
+}
+
+function setFilter(key, value) {
+  filters[key] = value;
+  updateFilterBar();
+  render();
+}
+
+function clearFilters() {
+  filters = { origem: '', modalidade: '', status: '', estado: '' };
+  FILTER_IDS.forEach(id => { const el = $(id); if (el) el.value = ''; });
+  updateFilterBar();
+  render();
+}
+
+function updateFilterBar() {
+  const anyActive = Object.values(filters).some(v => v !== '');
+  $('filter-clear')?.classList.toggle('show', anyActive);
+  FILTER_IDS.forEach(id => { const el = $(id); if (el) el.classList.toggle('active', el.value !== ''); });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER ROUTER
+   ═══════════════════════════════════════════════════════════════ */
+
+function render() {
+  $('total-count').textContent = vagas.length;
+  const favCount = vagas.filter(v => v.favorito).length;
+  $('fav-filter-count').textContent = favCount;
+  $('fav-filter-btn').classList.toggle('on', favFilter);
+
+  if (vagas.length === 0 && currentView !== 'insights') {
+    renderEmpty();
+    return;
+  }
+
+  if (currentView === 'pipeline') renderPipeline();
+  else if (currentView === 'lista') renderTable();
+  else if (currentView === 'insights') renderInsights();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderEmpty() {
+  $('content').innerHTML = `
+    <div class="empty-state">
+      <i class="ti ti-briefcase"></i>
+      <h3>nenhuma vaga ainda</h3>
+      <p>comece adicionando vagas que apareceram nas suas conversas com recrutas ou que você encontrou. tecle <strong>N</strong> ou clique no botão abaixo.</p>
+      <button class="btn btn-primary" onclick="openModal()">
+        <i class="ti ti-plus"></i> adicionar primeira vaga
+      </button>
+    </div>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PIPELINE VIEW
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderPipeline() {
+  const filtered = getFiltered();
+
+  const hasAnyFavorite = vagas.some(v => v.favorito);
+  if (favFilter && !hasAnyFavorite) {
+    $('content').innerHTML = `
+      <div class="empty-state">
+        <i class="ti ti-star"></i>
+        <h3>nenhuma vaga favoritada</h3>
+        <p>passe o mouse num card e clique na estrela pra marcar as vagas que você quer acompanhar de perto.</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '<div class="pipeline-wrap"><div class="pipeline" id="board">';
+  STAGES.forEach(stage => {
+    const items = filtered.filter(v => v.status === stage.id);
+    const ativos = items.filter(v => !v.recusado).length;
+    const recusados = items.length - ativos;
+    const countLabel = recusados > 0
+      ? `${ativos} <span style="color:var(--text-3);font-weight:400">+${recusados}</span>`
+      : `${ativos}`;
+    html += `
+      <div class="pipeline-col">
+        <div class="col-header">
+          <span class="col-label"><i class="ti ${stage.icon}" style="font-size:13px;vertical-align:-2px;margin-right:5px;opacity:0.7"></i>${stage.label}</span>
+          <span class="col-count">${countLabel}</span>
+        </div>
+        <div class="col-cards" data-stage="${stage.id}"
+             ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+          ${items.length === 0
+            ? `<div class="empty-col"><i class="ti ti-inbox" style="font-size:18px;display:block;margin-bottom:6px;opacity:0.4"></i>vazio</div>`
+            : items.map(cardHtml).join('')}
+        </div>
+      </div>
+    `;
+  });
+  html += '</div></div>';
+
+  $('content').innerHTML = html;
+}
+
+function cardHtml(v) {
+  const origemData = ORIGEM[v.origem];
+  const originBadge = origemData
+    ? `<span class="badge badge-neutral"><i class="ti ${origemData.icon}" style="font-size:10px;line-height:1;vertical-align:-1px;margin-right:3px"></i>${origemData.label}</span>`
+    : '';
+  const level = v.pausado || v.recusado ? 'ok' : getStageLevel(v);
+  const days = getStageDays(v);
+  const stageBadge = !v.pausado && !v.recusado && (level === 'warn' || level === 'danger')
+    ? `<span class="badge ${level === 'danger' ? 'badge-danger' : 'badge-warn'} tip" data-tip="${level === 'danger' ? 'muito além do prazo. alta chance de o processo ter esfriado sem aviso.' : 'passou do prazo esperado. vale fazer follow-up ou considerar seguir em frente.'}">${days}d parada</span>`
+    : '';
+  const pausedBadge   = v.pausado  ? `<span class="badge badge-paused">pausada</span>` : '';
+  const recusadoBadge = v.recusado ? `<span class="badge badge-rejected">recusado</span>` : '';
+  const commentDot = v.comentarios?.length
+    ? `<span class="card-comment-dot" title="${v.comentarios.length} registro${v.comentarios.length === 1 ? '' : 's'}"></span>`
+    : '';
+  const displayName = v.recruta ? v.recruta : esc(v.empresa);
+  const subtitle = v.recruta ? esc(v.empresa) : '';
+  const dateLabel = v.recusado ? fmtDate(v.dataRecusa) : fmtDate(v.dataAbordagem || v.data);
+  const draggable = !v.recusado;
+
+  return `
+    <div class="card ${v.pausado ? 'paused' : ''} ${v.recusado ? 'rejected' : ''}" ${draggable ? 'draggable="true"' : ''} data-id="${v.id}"
+         ${draggable ? `ondragstart="onDragStart(event,'${v.id}')" ondragend="onDragEnd(event)"` : ''}
+         onclick="openDetail('${v.id}')">
+      ${commentDot}
+      <button class="card-star ${v.favorito ? 'on' : ''}" onclick="toggleFavorito('${v.id}',event)" title="${v.favorito ? 'remover favorito' : 'marcar favorito'}">
+        <i class="ti ti-star"></i>
+      </button>
+      <div class="card-company">${subtitle || '&nbsp;'}</div>
+      <div class="card-title">${displayName}</div>
+      <div class="card-meta">
+        ${originBadge}
+        ${stageBadge}
+        ${pausedBadge}
+        ${recusadoBadge}
+        <span class="badge-date">${dateLabel}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAG AND DROP
+   ═══════════════════════════════════════════════════════════════ */
+
+let dragId = null;
+
+function onDragStart(e, id) {
+  dragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.target.classList.add('dragging');
+}
+
+function onDragEnd(e) {
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.col-cards.drag-over').forEach(el => el.classList.remove('drag-over'));
+  dragId = null;
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+
+function onDragLeave(e) {
+  if (e.currentTarget.contains(e.relatedTarget)) return;
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const newStatus = e.currentTarget.dataset.stage;
+  if (dragId && newStatus) move(dragId, newStatus);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TABLE VIEW
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderTable() {
+  const filtered = getFiltered();
+  const sorted = [...filtered].sort(compareSort);
+  const arrow = sortDir === 'asc' ? '↑' : '↓';
+
+  if (filtered.length === 0) {
+    $('content').innerHTML = `
+      <div class="empty-state">
+        <i class="ti ti-${favFilter ? 'star' : 'list'}"></i>
+        <h3>${favFilter ? 'nenhuma vaga favoritada' : 'nada encontrado'}</h3>
+        <p>${favFilter ? 'marque vagas com a estrela pra acompanhá-las de perto.' : 'tente outro termo de busca.'}</p>
+      </div>
+    `;
+    return;
+  }
+
+  const head = (label, field) => `
+    <th class="${sortField === field ? 'sort-active' : ''}" onclick="setSort('${field}')">
+      ${label}<span class="sort-arrow">${sortField === field ? arrow : '↕'}</span>
+    </th>
+  `;
+
+  let html = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-star"></th>
+            ${head('empresa', 'empresa')}
+            ${head('título', 'titulo')}
+            <th>recrutador</th>
+            <th>modalidade</th>
+            ${head('etapa', 'status')}
+            ${head('dias parada', 'stageDays')}
+            ${head('abordagem', 'dataAbordagem')}
+          </tr>
+        </thead>
+        <tbody>
+          ${sorted.map(v => {
+            const level = v.pausado || v.recusado ? 'ok' : getStageLevel(v);
+            const days = getStageDays(v);
+            const daysClass = level === 'danger' ? 'badge-danger' : level === 'warn' ? 'badge-warn' : '';
+            const pausedLabel = v.pausado ? ' <span class="badge badge-paused">pausada</span>' : '';
+            const rejectedLabel = v.recusado ? ` <span class="badge badge-rejected">recusado (${v.tipoRecusa === 'minha' ? 'você' : 'empresa'})</span>` : '';
+            return `
+              <tr onclick="openDetail('${v.id}')" class="${v.recusado ? 'row-rejected' : ''}">
+                <td class="col-star" onclick="event.stopPropagation()">
+                  <button class="row-star ${v.favorito ? 'on' : ''}" onclick="toggleFavorito('${v.id}',event)" title="${v.favorito ? 'remover favorito' : 'marcar favorito'}">
+                    <i class="ti ti-star"></i>
+                  </button>
+                </td>
+                <td class="company-cell">${esc(v.empresa)}</td>
+                <td>${esc(v.titulo)}</td>
+                <td class="muted">${esc(v.recruta || '—')}</td>
+                <td class="muted">${v.modalidade && v.modalidade !== 'indefinido' ? v.modalidade : '—'}</td>
+                <td>${getStage(v.status).label}${pausedLabel}${rejectedLabel}</td>
+                <td>${!v.recusado && daysClass ? `<span class="badge ${daysClass}">${days}d</span>` : `<span class="muted">${days}d</span>`}</td>
+                <td class="muted">${fmtDate(v.dataAbordagem || v.data)}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  $('content').innerHTML = html;
+}
+
+function compareSort(a, b) {
+  let av, bv;
+  if (sortField === 'stageDays') {
+    av = getStageDays(a); bv = getStageDays(b);
+  } else if (sortField === 'status') {
+    av = STAGE_IDX[a.status] ?? 0;
+    bv = STAGE_IDX[b.status] ?? 0;
+  } else if (sortField === 'dataAbordagem') {
+    av = a.dataAbordagem || a.data;
+    bv = b.dataAbordagem || b.data;
+  } else {
+    av = (a[sortField] || '').toString().toLowerCase();
+    bv = (b[sortField] || '').toString().toLowerCase();
+  }
+  if (av < bv) return sortDir === 'asc' ? -1 : 1;
+  if (av > bv) return sortDir === 'asc' ? 1 : -1;
+  return 0;
+}
+
+function setSort(field) {
+  if (sortField === field) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField = field;
+    sortDir = field === 'stageDays' || field === 'data' ? 'desc' : 'asc';
+  }
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INSIGHTS VIEW
+   ═══════════════════════════════════════════════════════════════ */
+
+// pure data computation — no HTML, testável isoladamente
+function computeInsights() {
+  const tecnicaIdx = STAGES.findIndex(s => s.id === 'entrevista-tecnica');
+
+  // health check
+  const totalAplicado = vagas.filter(v => !v.pausado).length;
+  const emTecnica     = vagas.filter(v => STAGE_IDX[v.status] >= tecnicaIdx && !v.pausado);
+  const taxaConversao = totalAplicado > 0 ? (emTecnica.length / totalAplicado) * 100 : null;
+
+  const recusadas = vagas.filter(v => v.recusado && v.dataRecusa);
+  const tempoMedioRecusa = recusadas.length > 0
+    ? recusadas.reduce((sum, v) => sum + (new Date(v.dataRecusa) - new Date(v.dataAbordagem || v.data)) / 864e5, 0) / recusadas.length
+    : null;
+
+  const recusaEmpresaCount = vagas.filter(v => v.recusado && v.tipoRecusa === 'empresa').length;
+  const recusaSuaCount     = vagas.filter(v => v.recusado && v.tipoRecusa === 'minha').length;
+  const totalRecusadas     = recusaEmpresaCount + recusaSuaCount;
+  const recusaEmpresaPct   = totalRecusadas > 0 ? (recusaEmpresaCount / totalRecusadas) * 100 : null;
+
+  const vagasMovimento = vagas.filter(v => daysSince(v.dataAbordagem || v.data) <= 14).length;
+  const amostras = {
+    conversao:    totalAplicado  || null,
+    recusa:       recusadas.length || null,
+    recusaEmpresa: totalRecusadas || null,
+  };
+
+  // diagnóstico
+  const ativas      = vagas.filter(v => v.status !== 'fechado' && !v.pausado && !v.recusado).length;
+  const paradasList = vagas.filter(v => v.status !== 'fechado' && !v.pausado && !v.recusado && getStageLevel(v) !== 'ok');
+  const novas14d    = vagasMovimento;
+
+  let diagnosticoTexto = '';
+  let diagnosticoAlerta = false;
+  if (vagas.length === 0) {
+    diagnosticoTexto = 'nenhuma vaga registrada ainda.';
+  } else if (novas14d === 0 && ativas > 0) {
+    diagnosticoTexto = `<strong>sem novas candidaturas nos últimos 14 dias.</strong> ${ativas} vaga${ativas===1?'':'s'} ativa${ativas===1?'':'s'} em andamento.`;
+    diagnosticoAlerta = true;
+  } else if (paradasList.length >= 2 && paradasList.length > ativas * 0.5) {
+    diagnosticoTexto = `<strong>${paradasList.length} vaga${paradasList.length===1?'':'s'} parada${paradasList.length===1?'':'s'}</strong> sem movimento. ${novas14d} nova${novas14d===1?'':'s'} nos últimos 14 dias.`;
+    diagnosticoAlerta = true;
+  } else {
+    diagnosticoTexto = `${ativas} vaga${ativas===1?'':'s'} ativa${ativas===1?'':'s'} · ${novas14d} nova${novas14d===1?'':'s'} nos últimos 14 dias.`;
+  }
+
+  // distribuição por etapa
+  const porEtapa = STAGES.map(s => ({
+    label: s.label,
+    count: vagas.filter(v => v.status === s.id && !v.pausado && !v.recusado).length,
+  }));
+
+  // origem com taxa conversão (single pass)
+  const porOrigemDetalhado = {};
+  vagas.forEach(v => {
+    const k = v.origem || 'sem origem';
+    if (!porOrigemDetalhado[k]) porOrigemDetalhado[k] = { total: 0, tecnica: 0 };
+    porOrigemDetalhado[k].total += 1;
+    if (STAGE_IDX[v.status] >= tecnicaIdx) porOrigemDetalhado[k].tecnica += 1;
+  });
+
+  // funil de conversão entre etapas
+  const conversoes = STAGES.slice(0, -1).map((stage, i) => {
+    const from = vagas.filter(v => STAGE_IDX[v.status] >= i).length;
+    const to   = vagas.filter(v => STAGE_IDX[v.status] >= i + 1).length;
+    return { from: stage.label, to: STAGES[i+1].label, rate: from > 0 ? Math.round((to/from)*100) : 0, count: to, total: from };
+  });
+
+  // timelines — single pass over vagas
+  const porMes = {};
+  const porSemana = {};
+  const hoje = new Date();
+  vagas.forEach(v => {
+    const d = new Date(v.dataAbordagem || v.data);
+    const mesKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    porMes[mesKey] = (porMes[mesKey] || 0) + 1;
+    const sem = Math.floor((hoje - d) / (7 * 864e5));
+    if (sem <= 8) porSemana[sem] = (porSemana[sem] || 0) + 1;
+  });
+
+  return {
+    metrics: { taxaConversao, tempoMedioRecusa, recusaEmpresa: recusaEmpresaPct, vagasMovimento, amostras },
+    diagnostico: { texto: diagnosticoTexto, alerta: diagnosticoAlerta },
+    porEtapa, porOrigemDetalhado, conversoes,
+    mesesOrdenados: Object.entries(porMes).sort().slice(-6),
+    semanasOrdenadas: Array.from({ length: 8 }, (_, i) => [i, porSemana[i] || 0]),
+    paradasList, recusadas,
+  };
+}
+
+// helper: gráfico de colunas reutilizado por mês e semana
+function renderColChart(items, getLabel, getCount) {
+  const counts = items.map(getCount);
+  const max = Math.max(...counts, 1);
+  return items.map((item, i) => {
+    const count = counts[i];
+    const pct = (count / max) * 100;
+    const label = getLabel(item, i);
+    return `
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%;">
+        <div style="font-size: 12px; font-weight: 600; color: var(--text-2);">${count}</div>
+        <div style="width: 100%; flex: 1; display: flex; align-items: flex-end; justify-content: center;">
+          <div style="width: 40%; height: ${pct}%; background: ${pct > 0 ? 'var(--accent)' : 'var(--bg-alt)'}; border-radius: 3px 3px 0 0; min-height: 3px;"></div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-2); font-weight: 500;">${label}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function insightCards(metrics) {
+  const { taxaConversao, tempoMedioRecusa, recusaEmpresa, vagasMovimento, amostras } = metrics || {};
+
+  const formatTaxa = (val) => val !== undefined && val !== null ? `${Math.round(val)}%` : '—';
+  const formatDias = (val) => val !== undefined && val !== null ? `${Math.round(val)}d` : '—';
+  const fmtAmostra = (n) => n ? `base: ${n} vaga${n === 1 ? '' : 's'}` : null;
+
+  return `
+    <div class="insight">
+      <div class="insight-label tip tip-left" data-tip="quantas das suas candidaturas chegaram à entrevista técnica. acima de 25% é um sinal saudável.">conversão geral</div>
+      <div class="insight-recorte">histórico completo</div>
+      <div class="insight-value">${formatTaxa(taxaConversao)}</div>
+      <div class="insight-sub">aplicado → entrevista técnica</div>
+      ${amostras?.conversao ? `<div class="insight-sub">${fmtAmostra(amostras.conversao)}</div>` : ''}
+    </div>
+    <div class="insight">
+      <div class="insight-label tip" data-tip="média de dias entre a abordagem e o não. útil pra calibrar quando fazer follow-up e quando desistir.">tempo até recusa</div>
+      <div class="insight-recorte">histórico completo</div>
+      <div class="insight-value">${formatDias(tempoMedioRecusa)}</div>
+      <div class="insight-sub">média de dias pra ouvir não</div>
+      ${amostras?.recusa ? `<div class="insight-sub">${fmtAmostra(amostras.recusa)}</div>` : ''}
+    </div>
+    <div class="insight">
+      <div class="insight-label tip" data-tip="dos processos encerrados, quantos foram recusados pela empresa. próximo de 100% pode indicar desalinhamento de perfil ou expectativa de salário.">recusa deles</div>
+      <div class="insight-recorte">histórico completo</div>
+      <div class="insight-value">${formatTaxa(recusaEmpresa)}</div>
+      <div class="insight-sub">vs recusa sua</div>
+      ${amostras?.recusaEmpresa ? `<div class="insight-sub">${fmtAmostra(amostras.recusaEmpresa)}</div>` : ''}
+    </div>
+    <div class="insight">
+      <div class="insight-label tip tip-right" data-tip="candidaturas com abordagem nos últimos 14 dias. abaixo de 2–3 por semana pode indicar ritmo baixo de busca.">em movimento</div>
+      <div class="insight-recorte">últimos 14 dias</div>
+      <div class="insight-value">${vagasMovimento || 0}</div>
+      <div class="insight-sub">novas candidaturas</div>
+    </div>
+  `;
+}
+
+function renderInsights() {
+  const { metrics, diagnostico, porEtapa, porOrigemDetalhado, conversoes,
+          mesesOrdenados, semanasOrdenadas, paradasList, recusadas } = computeInsights();
+
+  let html = '';
+
+  // 1. diagnóstico
+  html += `
+    <div class="diagnostico${diagnostico.alerta ? ' alerta' : ''}">
+      <div class="diagnostico-dot tip tip-left" data-tip="calculado com base nas candidaturas dos últimos 14 dias e nas vagas em andamento."></div>
+      <div class="diagnostico-text">${diagnostico.texto}</div>
+      <div class="diagnostico-recorte">atualizado agora</div>
+    </div>
+  `;
+
+  // 2. health check cards
+  html += '<div class="insights">';
+  html += insightCards(metrics);
+  html += '</div>';
+
+  // 3. vagas que precisam atenção — sobe pra cima
+  if (paradasList.length > 0) {
+    html += `
+      <div style="margin: 0 auto 1.5rem; max-width: var(--w-content);">
+        <div class="section-label">precisa de atenção · <span style="font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">${paradasList.length} vaga${paradasList.length === 1 ? '' : 's'}</span></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 0.75rem;">
+          ${paradasList.sort((a, b) => getStageDays(b) - getStageDays(a)).map(v => {
+            const level = getStageLevel(v);
+            const days = getStageDays(v);
+            const cls = level === 'danger' ? 'badge-danger' : 'badge-warn';
+            return `
+              <div onclick="openDetail('${v.id}')" class="attention-row">
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 13px; font-weight: 600;">${esc(v.titulo)}</div>
+                  <div style="font-size: 11px; color: var(--text-3); margin-top: 2px;">${esc(v.empresa)} · ${getStage(v.status).label}</div>
+                </div>
+                <span class="badge ${cls}">${days} dias parada</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // 4. distribuições
+  html += '<div class="insights-container">';
+
+  html += `
+    <div class="insights-section">
+      <div class="insights-section-title">distribuição por etapa</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        ${porEtapa.map(e => {
+          const maxCount = Math.max(...porEtapa.map(x => x.count), 1);
+          const pct = (e.count / maxCount) * 100;
+          return `
+            <div style="display: flex; align-items: center; gap: 12px; font-size: 12px;">
+              <span style="min-width: 110px; color: var(--text-2); font-weight: 500;">${e.label}</span>
+              <div style="flex: 1; height: 8px; background: var(--bg-alt); border-radius: 4px; overflow: hidden;">
+                <div style="width: ${pct}%; height: 100%; background: var(--accent); transition: width 0.3s;"></div>
+              </div>
+              <span style="min-width: 25px; text-align: right; font-weight: 600;">${e.count}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+
+  html += `
+    <div class="insights-section">
+      <div class="insights-section-title">taxa de conversão · <span style="font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">histórico completo</span><i class="ti ti-info-circle tip tip-right" style="font-size:13px;vertical-align:-1px;margin-left:6px;color:var(--text-3)" data-tip="% que passa de cada etapa para a próxima. onde a barra cai mais é onde o funil perde mais."></i></div>
+      <div style="display: flex; flex-direction: column; gap: 0;">
+        ${conversoes.map((c, i) => {
+          const w = Math.max(c.rate, 4);
+          return `
+            <div style="display: grid; grid-template-columns: 160px 1fr 60px; align-items: center; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--border);">
+              <span style="font-size: 12px; color: var(--text-2); font-weight: 500; white-space: nowrap;">${c.from}</span>
+              <div style="position: relative; height: 20px; background: var(--bg-alt); border-radius: 3px; overflow: hidden;">
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${w}%; background: var(--accent); opacity: ${0.3 + (c.rate / 100) * 0.7}; transition: width 0.3s;"></div>
+                <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 600; color: var(--text); line-height: 1;">${c.rate}%</span>
+              </div>
+              <span style="font-size: 11px; color: var(--text-3); text-align: right;">${c.count}/${c.total}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  html += `
+    <div class="insights-section">
+      <div class="insights-section-title">resultado por canal · <span style="font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">histórico completo</span><i class="ti ti-info-circle tip tip-right" style="font-size:13px;vertical-align:-1px;margin-left:6px;color:var(--text-3)" data-tip="canal com alta conversão mas baixo volume pode valer mais atenção do que o canal com mais candidaturas."></i></div>
+      <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+        ${Object.entries(porOrigemDetalhado).map(([origem, data]) => {
+          const label = ORIGEM[origem]?.full || origem;
+          const taxa = data.total > 0 ? Math.round((data.tecnica / data.total) * 100) : 0;
+          const maxCount = Math.max(...Object.values(porOrigemDetalhado).map(d => d.total), 1);
+          const pct = (data.total / maxCount) * 100;
+          return `
+            <div style="padding: 6px 0; border-bottom: 0.5px solid var(--border);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                <span style="min-width: 90px; color: var(--text-2); font-weight: 500;">${label}</span>
+                <div style="flex: 1; height: 6px; background: var(--bg-alt); border-radius: 4px; overflow: hidden;">
+                  <div style="width: ${pct}%; height: 100%; background: var(--accent); transition: width 0.3s;"></div>
+                </div>
+                <span style="min-width: 20px; text-align: right; font-weight: 600;">${data.total}</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-3); padding: 0 0 2px 90px;">
+                ${data.tecnica} entrevistas técnicas · ${taxa}% conversão
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  html += '</div>';
+
+  // 5. timelines
+  if (mesesOrdenados.length > 0) {
+    html += `
+      <div style="margin: 0 auto 2rem; max-width: var(--w-content);">
+        <div class="section-label">candidaturas por mês · <span style="font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">últimos 6 meses</span></div>
+        <div style="display: flex; align-items: flex-end; gap: 14px; height: 140px; padding: 1rem 0; margin-top: 1rem;">
+          ${renderColChart(
+            mesesOrdenados,
+            ([mes]) => { const [y, m] = mes.split('-'); return new Date(parseInt(y), parseInt(m)-1).toLocaleDateString('pt-BR', { month: 'short' }); },
+            ([, c]) => c
+          )}
+        </div>
+      </div>
+    `;
+  }
+
+  if (semanasOrdenadas.some(([, c]) => c > 0)) {
+    html += `
+      <div style="margin: 0 auto 2rem; max-width: var(--w-content);">
+        <div class="section-label">candidaturas por semana · <span style="font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">últimas 8 semanas</span></div>
+        <div style="display: flex; align-items: flex-end; gap: 10px; height: 140px; padding: 1rem 0; margin-top: 1rem;">
+          ${renderColChart(
+            semanasOrdenadas,
+            ([sem]) => sem === 0 ? 'esta' : `${sem}s atrás`,
+            ([, c]) => c
+          )}
+        </div>
+      </div>
+    `;
+  }
+
+  // 6. recusadas
+  if (recusadas.length > 0) {
+    html += `
+      <div style="margin: 1.5rem auto 0; max-width: var(--w-content);">
+        <div class="section-label">vagas recusadas · <span style="font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">histórico completo</span></div>
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 0.75rem;">
+          ${recusadas.sort((a, b) => new Date(b.dataRecusa) - new Date(a.dataRecusa)).map(v => {
+            const daysTotal = daysSince(v.dataAbordagem || v.data);
+            const tipoLabel = v.tipoRecusa === 'minha' ? 'você recusou' : 'empresa recusou';
+            return `
+              <div onclick="openDetail('${v.id}')" class="rejected-row">
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 13px; font-weight: 600; color: var(--danger-text);">${esc(v.titulo)}</div>
+                  <div style="font-size: 11px; color: var(--danger-text); opacity: 0.8; margin-top: 2px;">${esc(v.empresa)} · ${tipoLabel}</div>
+                </div>
+                <span style="font-size: 11px; color: var(--danger-text); font-weight: 500; white-space: nowrap;">${daysTotal}d total</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  $('content').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DETAIL PANEL
+   ═══════════════════════════════════════════════════════════════ */
+
+function openDetail(id) {
+  selectedId = id;
+  const v = vagas.find(x => x.id === id);
+  if (!v) return;
+
+  // atualiza header com badge de comentários se tiver
+  const count = v.comentarios?.length || 0;
+  const titleTag = document.querySelector('.title-tag');
+  if (titleTag) {
+    titleTag.innerHTML = count
+      ? `detalhe da vaga <span class="badge badge-comment" style="margin-left:6px;vertical-align:1px"><i class="ti ti-message-circle" style="font-size:10px;line-height:1;vertical-align:-1px;margin-right:3px"></i>${count}</span>`
+      : 'detalhe da vaga';
+  }
+
+  const stepsHtml = STAGES.map(s =>
+    `<button class="step ${v.status === s.id ? 'on' : ''}" onclick="move('${id}','${s.id}')">${s.label}</button>`
+  ).join('');
+
+  // wire star button in header
+  const starBtn = $('detail-star-btn');
+  const starIcon = $('detail-star-icon');
+  if (starBtn) {
+    starBtn.onclick = (e) => toggleFavorito(id, e);
+    starIcon.style.color = v.favorito ? 'var(--accent)' : '';
+  }
+
+  const days = getStageDays(v);
+  const level = getStageLevel(v);
+  const daysCls = level === 'danger' ? 'badge-danger' : level === 'warn' ? 'badge-warn' : '';
+  const daysUntilRefusal = v.recusado && v.dataRecusa
+    ? Math.floor((new Date(v.dataRecusa) - new Date(v.dataAbordagem || v.data)) / 864e5)
+    : null;
+
+  $('detail-body').innerHTML = `
+    <input class="detail-company-edit" type="text" value="${esc(v.empresa)}"
+           oninput="editField('${id}','empresa',this.value)" placeholder="empresa">
+    <input class="detail-title-edit" type="text" value="${esc(v.titulo)}"
+           oninput="editField('${id}','titulo',this.value)" placeholder="título da vaga">
+
+    <div class="section-label">etapa atual</div>
+    <div class="steps">${stepsHtml}</div>
+
+    <div style="display:flex; gap:8px; margin-bottom:1.25rem">
+      <button class="btn ${v.pausado ? 'btn-paused-on' : ''}" style="flex:1; justify-content:center; gap:8px" onclick="togglePause('${id}')">
+        <i class="ti ti-${v.pausado ? 'player-play' : 'player-pause'}"></i>
+        ${v.pausado ? 'retomar' : 'pausar'}
+      </button>
+      <button class="btn ${v.recusado ? 'btn-rejected-on' : ''}" style="flex:1; justify-content:center; gap:8px" onclick="askReject('${id}')">
+        <i class="ti ti-${v.recusado ? 'check' : 'x'}"></i>
+        ${v.recusado ? 'desfazer recusa' : 'marcar recusado'}
+      </button>
+    </div>
+
+    <dl class="detail-grid">
+      <dt>recrutador</dt>
+      <dd><input type="text" value="${esc(v.recruta || '')}"
+          oninput="editField('${id}','recruta',this.value)" placeholder="nome do recrutador"></dd>
+
+      <dt>origem</dt>
+      <dd>
+        <select onchange="editField('${id}','origem',this.value)">
+          <option value="" ${!v.origem ? 'selected' : ''}>—</option>
+          ${Object.entries(ORIGEM).map(([k, o]) =>
+            `<option value="${k}" ${v.origem === k ? 'selected' : ''}>${o.full}</option>`
+          ).join('')}
+        </select>
+      </dd>
+
+      <dt>modalidade</dt>
+      <dd>
+        <select onchange="editField('${id}','modalidade',this.value)">
+          <option value="indefinido" ${(v.modalidade||'indefinido') === 'indefinido' ? 'selected' : ''}>indefinido</option>
+          <option value="remoto" ${v.modalidade === 'remoto' ? 'selected' : ''}>remoto</option>
+          <option value="hibrido" ${v.modalidade === 'hibrido' ? 'selected' : ''}>híbrido</option>
+          <option value="presencial" ${v.modalidade === 'presencial' ? 'selected' : ''}>presencial</option>
+        </select>
+      </dd>
+
+      <dt>abordagem</dt>
+      <dd><input type="date" value="${(v.dataAbordagem || v.data).split('T')[0]}"
+          onchange="editField('${id}','dataAbordagem',new Date(this.value).toISOString())"></dd>
+
+      <dt>registrado</dt>
+      <dd class="readonly">${fmtDate(v.data)}</dd>
+
+      <dt>nesta etapa</dt>
+      <dd class="readonly">
+        ${v.recusado && daysUntilRefusal !== null
+          ? `<span style="color:var(--text-3)">${daysUntilRefusal}d até a recusa</span>`
+          : daysCls
+            ? `<span class="badge ${daysCls}">${days} dias parada</span>`
+            : `<span style="color:var(--text-3)">${days} dia${days === 1 ? '' : 's'}</span>`}
+      </dd>
+
+      <dt>contexto</dt>
+      <dd><textarea oninput="editField('${id}','resumo',this.value)" placeholder="tipo de produto, contexto do time...">${esc(v.resumo || '')}</textarea></dd>
+
+      <dt>observações</dt>
+      <dd><textarea id="obs-input" oninput="editField('${id}','obs',this.value)" placeholder="primeira impressão, alertas, contexto...">${esc(v.obs || '')}</textarea></dd>
+    </dl>
+
+    <div class="save-indicator" id="save-indicator"></div>
+
+    <div class="timeline-section">
+      <div class="section-label">linha do tempo</div>
+      <div class="timeline-input-wrap">
+        <input type="text" id="comment-input" placeholder="registre um contato, atualização ou observação..." 
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addComentario('${id}')}">
+        <button class="btn" onclick="addComentario('${id}')">
+          <i class="ti ti-plus"></i>
+        </button>
+      </div>
+      <div class="timeline-list" id="timeline-list">
+        ${renderTimeline(v)}
+      </div>
+    </div>
+  `;
+
+  $('detail').classList.add('open');
+}
+
+function closeDetail() {
+  $('detail').classList.remove('open');
+  selectedId = null;
+}
+
+function renderTimeline(v) {
+  if (!v.comentarios?.length) {
+    return `<div class="timeline-empty">nenhum registro ainda</div>`;
+  }
+  return [...v.comentarios]
+    .sort((a, b) => new Date(b.data) - new Date(a.data))
+    .map(c => {
+      const dt = new Date(c.data);
+      const dataFmt = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+      const horaFmt = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="timeline-item">
+          <div>
+            <div class="timeline-date">${dataFmt} · ${horaFmt}</div>
+            <div class="timeline-text">${esc(c.texto)}</div>
+          </div>
+          <button class="timeline-delete" onclick="deleteComentario('${v.id}','${c.id}')" title="remover">
+            <i class="ti ti-x"></i>
+          </button>
+        </div>
+      `;
+    }).join('');
+}
+
+function addComentario(id) {
+  const input = $('comment-input');
+  const texto = input?.value.trim();
+  if (!texto) return;
+
+  const v = vagas.find(x => x.id === id);
+  if (!v) return;
+
+  v.comentarios.push({ id: uid(), texto, data: new Date().toISOString() });
+  persist();
+
+  const tl = $('timeline-list');
+  if (tl) tl.innerHTML = renderTimeline(v);
+  input.value = '';
+  input.focus();
+
+  if (currentView !== 'insights') render();
+}
+
+function deleteComentario(vagaId, comentarioId) {
+  const v = vagas.find(x => x.id === vagaId);
+  if (!v) return;
+
+  v.comentarios = v.comentarios.filter(c => c.id !== comentarioId);
+  persist();
+
+  const tl = $('timeline-list');
+  if (tl) tl.innerHTML = renderTimeline(v);
+
+  if (currentView !== 'insights') render();
+}
+
+function editField(id, field, val) {
+  const v = vagas.find(x => x.id === id);
+  if (!v) return;
+  v[field] = val;
+
+  const ind = $('save-indicator');
+  if (ind) ind.textContent = 'editando...';
+
+  clearTimeout(fieldTimers[field]);
+  fieldTimers[field] = setTimeout(() => {
+    persist();
+    if (ind) {
+      ind.textContent = 'salvo ✓';
+      setTimeout(() => { if (ind) ind.textContent = ''; }, 1500);
+    }
+    if (['empresa','titulo','origem','recruta','modalidade','pausado'].includes(field)) {
+      if (currentView !== 'insights') render();
+    }
+  }, 600);
+}
+
+function togglePause(id) {
+  const v = vagas.find(x => x.id === id);
+  if (!v) return;
+  v.pausado = !v.pausado;
+  persist();
+  render();
+  openDetail(id);
+  showToast(v.pausado ? 'vaga pausada' : 'vaga retomada', () => {
+    v.pausado = !v.pausado;
+    persist();
+    render();
+    if (selectedId === id) openDetail(id);
+  });
+}
+
+function askReject(id) {
+  const v = vagas.find(x => x.id === id);
+  if (!v) return;
+
+  if (v.recusado) {
+    // desfazer recusa — restaura o estado anterior limpo
+    const prev = { dataRecusa: v.dataRecusa, tipoRecusa: v.tipoRecusa };
+    v.recusado = false;
+    v.dataRecusa = null;
+    v.tipoRecusa = null;
+    persist();
+    render();
+    openDetail(id);
+    showToast('recusa desfeita', () => {
+      v.recusado = true;
+      v.dataRecusa = prev.dataRecusa;
+      v.tipoRecusa = prev.tipoRecusa;
+      persist();
+      render();
+      if (selectedId === id) openDetail(id);
+    });
+    return;
+  }
+
+  // marcar como recusado
+  const body = `
+    <div style="display: flex; gap: 12px; margin-bottom: 1.5rem;">
+      <button class="btn" style="flex: 1; background: var(--bg-alt);" onclick="confirmReject('${id}', 'minha')">
+        <i class="ti ti-x"></i> eu recusei
+      </button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="confirmReject('${id}', 'empresa')">
+        <i class="ti ti-alert-circle"></i> empresa recusou
+      </button>
+    </div>
+  `;
+  askConfirm(
+    'marcar como recusado',
+    `qual foi o tipo de recusa para <strong>${esc(v.titulo)}</strong>?`,
+    body,
+    null
+  );
+}
+
+function confirmReject(id, tipo) {
+  const v = vagas.find(x => x.id === id);
+  if (!v) return;
+
+  v.recusado = true;
+  v.dataRecusa = new Date().toISOString();
+  v.tipoRecusa = tipo;
+  persist();
+  render();
+  closeConfirm();
+  closeDetail();
+
+  showToast(`recusa registrada — ${tipo === 'minha' ? 'você recusou' : 'empresa recusou'}`, () => {
+    v.recusado = false;
+    v.dataRecusa = null;
+    v.tipoRecusa = null;
+    persist();
+    render();
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOVE STAGE (with undo)
+   ═══════════════════════════════════════════════════════════════ */
+
+function move(id, newStatus) {
+  const v = vagas.find(x => x.id === id);
+  if (!v) return;
+  if (v.status === newStatus && !v.recusado) return;
+
+  const prev = { status: v.status, stageEnteredAt: v.stageEnteredAt, recusado: v.recusado, dataRecusa: v.dataRecusa, tipoRecusa: v.tipoRecusa };
+  v.status = newStatus;
+  v.stageEnteredAt = new Date().toISOString();
+  if (v.recusado) { v.recusado = false; v.dataRecusa = null; v.tipoRecusa = null; }
+  persist();
+  render();
+
+  if (selectedId === id) openDetail(id);
+
+  showToast(`movido para "${getStage(newStatus).label}"`, () => {
+    v.status = prev.status;
+    v.stageEnteredAt = prev.stageEnteredAt;
+    v.recusado = prev.recusado;
+    v.dataRecusa = prev.dataRecusa;
+    v.tipoRecusa = prev.tipoRecusa;
+    persist();
+    render();
+    if (selectedId === id) openDetail(id);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DELETE (with undo)
+   ═══════════════════════════════════════════════════════════════ */
+
+function askDelete() {
+  if (!selectedId) return;
+  const v = vagas.find(x => x.id === selectedId);
+  if (!v) return;
+  askConfirm(
+    'excluir vaga',
+    `tem certeza que quer excluir <strong>${esc(v.titulo)}</strong> em <strong>${esc(v.empresa)}</strong>? você poderá desfazer logo em seguida.`,
+    null,
+    () => deleteVaga(selectedId)
+  );
+}
+
+function deleteVaga(id) {
+  const idx = vagas.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  const deleted = vagas[idx];
+  vagas.splice(idx, 1);
+  persist();
+  closeDetail();
+  render();
+
+  showToast(`"${deleted.titulo}" excluída`, () => {
+    vagas.splice(idx, 0, deleted);
+    persist();
+    render();
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONFIRM DIALOG
+   ═══════════════════════════════════════════════════════════════ */
+
+function askConfirm(title, message, bodyHtml, onConfirm) {
+  $('confirm-title').textContent = title;
+  $('confirm-message').innerHTML = message;
+  $('confirm-body').innerHTML = bodyHtml || '';
+  confirmCallback = onConfirm;
+  $('confirm-overlay').classList.add('open');
+  setTimeout(() => $('confirm-action').focus(), 50);
+}
+
+function closeConfirm() {
+  $('confirm-overlay').classList.remove('open');
+  confirmCallback = null;
+}
+
+$('confirm-action').onclick = () => {
+  if (confirmCallback) confirmCallback();
+  closeConfirm();
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST + UNDO
+   ═══════════════════════════════════════════════════════════════ */
+
+function showToast(msg, undoCallback) {
+  $('toast-msg').textContent = msg;
+  lastAction = undoCallback;
+  $('toast-undo').style.display = undoCallback ? '' : 'none';
+  $('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 5000);
+}
+
+function hideToast() {
+  $('toast').classList.remove('show');
+  lastAction = null;
+}
+
+function undo() {
+  if (lastAction) lastAction();
+  hideToast();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EXPORT / IMPORT
+   ═══════════════════════════════════════════════════════════════ */
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(vagas, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `job-pipeline-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('dados exportados', null);
+}
+
+function triggerImport() {
+  $('import-file').click();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const incoming = JSON.parse(e.target.result);
+      if (!Array.isArray(incoming)) throw new Error('not array');
+
+      const incomingIds = new Set(incoming.map(v => v.id));
+      const existingIds = new Set(vagas.map(v => v.id));
+
+      const toAdd = incoming.filter(v => !existingIds.has(v.id));
+      const toUpdate = incoming.filter(v => existingIds.has(v.id));
+      const toKeep = vagas.filter(v => !incomingIds.has(v.id));
+
+      const diffHtml = `
+        <div class="diff-summary">
+          <div class="diff-row diff-add"><strong>+${toAdd.length}</strong> vagas novas serão adicionadas</div>
+          <div class="diff-row diff-update"><strong>~${toUpdate.length}</strong> vagas existentes serão atualizadas</div>
+          <div class="diff-row diff-keep"><strong>=${toKeep.length}</strong> vagas atuais serão mantidas</div>
+        </div>
+      `;
+
+      askConfirm(
+        'importar dados',
+        `arquivo contém <strong>${incoming.length} vagas</strong>. confira o que vai acontecer:`,
+        diffHtml,
+        () => {
+          // merge: incoming takes priority on conflicts
+          const merged = [...toAdd, ...toUpdate, ...toKeep];
+          // backfill stageEnteredAt
+          merged.forEach(v => { if (!v.stageEnteredAt) v.stageEnteredAt = v.data; });
+          vagas = merged;
+          persist();
+          render();
+          showToast(`importação concluída: ${toAdd.length} novas, ${toUpdate.length} atualizadas`, null);
+        }
+      );
+    } catch {
+      showToast('arquivo inválido — não é um json de vagas válido', null);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════════════════════ */
+
+function setView(view) {
+  currentView = view;
+  document.querySelectorAll('.sidebar-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === view)
+  );
+  const titles = {
+    pipeline: 'pipeline de vagas',
+    lista: 'todas as vagas',
+    insights: 'insights do funil',
+  };
+  $('view-title').textContent = titles[view];
+  $('fav-filter-btn').style.display = view === 'insights' ? 'none' : '';
+  $('filter-bar').style.display = view === 'insights' ? 'none' : '';
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+   ═══════════════════════════════════════════════════════════════ */
+
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement.tagName;
+  const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+  // ESC closes everything (priority order)
+  if (e.key === 'Escape') {
+    if ($('confirm-overlay').classList.contains('open')) {
+      e.preventDefault();
+      closeConfirm();
+      return;
+    }
+    if ($('overlay').classList.contains('open')) {
+      e.preventDefault();
+      closeModal();
+      return;
+    }
+    if ($('detail').classList.contains('open')) {
+      e.preventDefault();
+      closeDetail();
+      return;
+    }
+    if (searchQuery && document.activeElement === $('search')) {
+      e.preventDefault();
+      clearSearch();
+      $('search').blur();
+      return;
+    }
+  }
+
+  // N opens new vaga modal (only when not typing)
+  if (!isTyping && (e.key === 'n' || e.key === 'N')) {
+    if (!$('overlay').classList.contains('open') &&
+        !$('confirm-overlay').classList.contains('open')) {
+      e.preventDefault();
+      openModal();
+    }
+  }
+
+  // / focuses search
+  if (!isTyping && e.key === '/') {
+    e.preventDefault();
+    $('search').focus();
+  }
+});
+
+// close detail/overlay when clicking outside (não confirm overlay)
+$('overlay').addEventListener('click', e => {
+  if (e.target === $('overlay')) {
+    closeModal();
+  }
+});
+
+$('detail').addEventListener('click', e => {
+  if (e.target === $('detail')) {
+    closeDetail();
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   FAVORITO
+   ═══════════════════════════════════════════════════════════════ */
+
+function toggleFavorito(id, e) {
+  e.stopPropagation();
+  const v = vagas.find(x => x.id === id);
+  if (!v) return;
+  v.favorito = !v.favorito;
+  persist();
+  render();
+  if (selectedId === id) openDetail(id);
+}
+
+function toggleFavFilter() {
+  favFilter = !favFilter;
+  if (favFilter && currentView === 'insights') setView('pipeline');
+  else render();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════════ */
+
+load();
+render();
+</script>
+</body>
+</html>
