@@ -1027,6 +1027,12 @@
       </div>
       <div class="row">
         <div class="field">
+          <label class="field-label">link da vaga</label>
+          <input type="text" id="f-link" placeholder="https://linkedin.com/jobs/...">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
           <label class="field-label">recrutador</label>
           <input type="text" id="f-recruta" placeholder="nome do recrutador (opcional)">
         </div>
@@ -1205,6 +1211,7 @@ function load() {
       if (v.dataRecusa  === undefined) v.dataRecusa  = null;
       if (v.tipoRecusa  === undefined) v.tipoRecusa  = null;
       if (!v.comentarios) v.comentarios = [];
+      if (!v.link) v.link = '';
     });
   } catch(e) {
     console.error('[job-pipeline] falha ao carregar dados:', e);
@@ -1239,7 +1246,7 @@ function pickType(type) {
 }
 
 function openModal() {
-  ['f-empresa','f-titulo','f-recruta','f-resumo','f-obs'].forEach(id => $(id).value = '');
+  ['f-empresa','f-titulo','f-link','f-recruta','f-resumo','f-obs'].forEach(id => $(id).value = '');
   $('f-modalidade').value = 'indefinido';
   $('f-data-abordagem').value = new Date().toISOString().split('T')[0];
   $('save-msg').classList.remove('show');
@@ -1265,6 +1272,7 @@ function save() {
     empresa,
     titulo,
     recruta:      $('f-recruta').value.trim(),
+    link:         $('f-link').value.trim(),
     origem:       $('f-origem').value,
     modalidade:   $('f-modalidade').value || 'indefinido',
     resumo:       $('f-resumo').value.trim(),
@@ -1986,6 +1994,10 @@ function openDetail(id) {
     <input class="detail-title-edit" type="text" value="${esc(v.titulo)}"
            oninput="editField('${id}','titulo',this.value)" placeholder="título da vaga">
 
+    <div id="link-btn-wrap" style="margin-bottom:1.25rem">
+      ${v.link ? `<a href="${esc(v.link)}" target="_blank" rel="noopener noreferrer" class="btn"><i class="ti ti-external-link"></i> abrir vaga</a>` : ''}
+    </div>
+
     <div class="section-label">etapa atual</div>
     <div class="steps">${stepsHtml}</div>
 
@@ -2040,6 +2052,11 @@ function openDetail(id) {
             ? `<span class="badge ${daysCls}">${days} dias parada</span>`
             : `<span style="color:var(--text-3)">${days} dia${days === 1 ? '' : 's'}</span>`}
       </dd>
+
+      <dt>link</dt>
+      <dd><input type="text" value="${esc(v.link || '')}"
+          oninput="editField('${id}','link',this.value); updateLinkBtn(this.value.trim())"
+          placeholder="https://linkedin.com/jobs/..."></dd>
 
       <dt>contexto</dt>
       <dd><textarea oninput="editField('${id}','resumo',this.value)" placeholder="tipo de produto, contexto do time...">${esc(v.resumo || '')}</textarea></dd>
@@ -2503,6 +2520,18 @@ function toggleFavFilter() {
   favFilter = !favFilter;
   if (favFilter && currentView === 'insights') setView('pipeline');
   else render();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LINK BUTTON
+   ═══════════════════════════════════════════════════════════════ */
+
+function updateLinkBtn(link) {
+  const wrap = $('link-btn-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = link
+    ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer" class="btn"><i class="ti ti-external-link"></i> abrir vaga</a>`
+    : '';
 }
 
 /* ═══════════════════════════════════════════════════════════════
